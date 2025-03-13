@@ -11,7 +11,11 @@ app = Flask(__name__)
 
 # Configura la conexión a MongoDB usando la variable de entorno.
 # La URI debe incluir el nombre de la base de datos (por ejemplo, "Artz")
-app.config["MONGO_URI"] = os.getenv("MONGO_URI")
+mongo_uri = os.getenv("MONGO_URI")
+if not mongo_uri:
+    app.logger.error("MONGO_URI no está definida en las variables de entorno")
+    raise Exception("La variable MONGO_URI es requerida")
+app.config["MONGO_URI"] = mongo_uri
 mongo = PyMongo(app)
 
 # Colecciones
