@@ -1,0 +1,442 @@
+:root {
+    --clr-primary: #000000;
+    --clr-secondary: #ffffff;
+    --clr-accent: #ff0000;
+    --clr-neutral-100: #f6f6f6;
+    --clr-neutral-300: #d1d3d0;
+    --hover-opacity: 0.75;
+    --mobile-padding: 15px;
+    --tablet-padding: 25px;
+    --input-height-mobile: 40px;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100vh;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--clr-secondary);
+}
+
+.main-container {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.mt-1 {
+    margin-top: 1rem;
+}
+
+.info-button {
+    text-decoration: none;
+    padding: 0.25rem 1rem;
+    background-color: var(--clr-neutral-100);
+}
+
+.info-button:hover {
+    opacity: var(--hover-opacity);
+}
+
+.form-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.form-page .back-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.form-page .back-button a {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: var(--clr-primary);
+    margin-right: 2rem;
+}
+
+.form-page .back-button a:hover {
+    opacity: var(--hover-opacity);
+}
+
+.form-page .back-button a svg {
+    width: 100%;
+    max-height: 50px;
+}
+
+.form-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(7, 0fr);
+    grid-column-gap: 15px;
+    grid-row-gap: 15px;
+    width: 100%;
+    max-width: 940px;
+}
+
+.form-container .input-group,
+.form-container .input-file label {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.form-container .spacer {
+    margin: 1.5rem;
+}
+
+.form-container .header {
+    grid-area: 1 / 1 / 2 / 7;
+}
+.form-container .input-group:nth-child(2) {
+    grid-area: 2 / 1 / 3 / 3;
+}
+.form-container .input-group:nth-child(3) {
+    grid-area: 2 / 3 / 3 / 4;
+}
+.form-container .input-group:nth-child(4) {
+    grid-area: 2 / 4 / 3 / 5;
+}
+.form-container .input-group:nth-child(5) {
+    grid-area: 2 / 5 / 3 / 6;
+}
+.form-container .input-group:nth-child(6) {
+    grid-area: 2 / 6 / 3 / 7;
+}
+.form-container .input-group:nth-child(7) {
+    grid-area: 3 / 1 / 4 / 3;
+}
+.form-container .input-group:nth-child(8) {
+    grid-area: 3 / 3 / 4 / 5;
+}
+.form-container .input-group:nth-child(9) {
+    grid-area: 3 / 5 / 4 / 7;
+}
+.form-container .input-group:nth-child(10) {
+    grid-area: 4 / 1 / 5 / 7;
+}
+.form-container .input-group:nth-child(11) {
+    grid-area: 5 / 1 / 6 / 3;
+}
+.form-container .input-group:nth-child(12) {
+    grid-area: 5 / 3 / 6 / 5;
+}
+.form-container .input-group:nth-child(13) {
+    grid-area: 5 / 5 / 6 / 7;
+}
+.form-container .input-group:nth-child(14) {
+    grid-area: 6 / 1 / 7 / 3;
+}
+.form-container .input-group:nth-child(15) {
+    grid-area: 6 / 3 / 7 / 5;
+}
+.form-container .input-group:nth-child(16) {
+    grid-area: 6 / 5 / 7 / 7;
+}
+.form-container .input-group:nth-child(17) {
+    grid-area: 7 / 1 / 8 / 7;
+}
+.form-container .input-group:nth-child(18) {
+    grid-area: 8 / 1 / 9 / 7;
+}
+.form-container .input-group:nth-child(19) {
+    grid-area: 9 / 1 / 10 / 7;
+}
+.form-container .input-group:nth-child(20) {
+    grid-area: 10 / 1 / 11 / 7;
+}
+.form-container .input-group:nth-child(21) {
+    grid-area: 11 / 1 / 12 / 7;
+}
+.form-container .input-group:nth-child(22) {
+    grid-area: 12 / 1 / 13 / 4;
+}
+.form-container .input-group:nth-child(23) {
+    grid-area: 12 / 4 / 13 / 7;
+}
+.form-container .input-group:nth-child(24) {
+    grid-area: 13 / 1 / 14 / 7;
+}
+
+.form-container .header {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.form-container .form-title {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.form-container .form-subtitle {
+    margin-bottom: 0;
+}
+
+.form-container .id-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: flex-end;
+    align-items: center;
+    gap: 5px;
+}
+
+.form-container .id-container .id-title {
+    margin: 0;
+}
+
+.form-container .id-container .id-number {
+    color: var(--clr-accent);
+    text-decoration: none;
+    border: 1px solid var(--clr-neutral-300);
+    padding: 10px 5px;
+}
+
+.form-container .input-group input,
+.form-container .input-group select,
+.form-container .input-group textarea {
+    height: 40px;
+    border: 1px solid var(--clr-neutral-300);
+    padding: 5px;
+}
+
+.form-container .input-group select {
+    height: 52px;
+}
+
+.form-container .input-group textarea {
+    height: 150px;
+    resize: vertical;
+}
+
+.form-container .input-file .icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    border: 1px solid var(--clr-neutral-300);
+}
+
+.form-container .input-file .icon-container svg {
+    height: 35px;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.form-container .input-group .complex-label {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: -14px;
+}
+
+.form-container .input-group .info-label {
+    font-size: 10px;
+}
+
+.form-container .input-group .complex-label label,
+.form-container .input-group .complex-label p {
+    border: 1px solid var(--clr-neutral-300);
+    padding: 2px 10px;
+}
+
+/* Hacemos "Marca - Local", "Torre" y "Otros" clickeables */
+.form-container .input-group .complex-label {
+    cursor: pointer;
+}
+.form-container .input-group .complex-label label,
+.form-container .input-group .complex-label p {
+    cursor: pointer;
+}
+
+/* Estilos para el botón "Agregar" */
+.form-container .input-group .action-button {
+    text-decoration: none;
+    border: 1px solid var(--clr-neutral-300);
+    width: 170px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    background-color: var(--clr-primary);
+    color: var(--clr-secondary);
+    transition: opacity 0.3s ease;
+}
+.form-container .input-group .action-button:hover {
+    opacity: var(--hover-opacity);
+}
+
+/* Estilos para el botón "Enviar solicitud" */
+.form-container button[type="submit"] {
+    width: 250px;
+    margin: auto;
+    padding: 0.5rem 1rem;
+    color: var(--clr-secondary);
+    background-color: var(--clr-primary);
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+.form-container button[type="submit"]:disabled {
+    opacity: var(--hover-opacity);
+    cursor: not-allowed;
+}
+
+/* Estilos para la tabla de trabajadores */
+#workers-table {
+  border: 1px solid var(--clr-neutral-300);
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#workers-table th,
+#workers-table td {
+  border: 1px solid var(--clr-neutral-300);
+  padding: 5px;
+  text-align: left;
+}
+
+/* Encabezado con fondo negro y letras blancas */
+#workers-table th {
+  background-color: var(--clr-primary);
+  color: var(--clr-secondary);
+}
+
+/* Estilos para el grupo en línea de Proveedor y RFC/CURP */
+.inline-group {
+  display: flex;
+  gap: 1rem;
+}
+.inline-input {
+  flex: 1;
+}
+
+/* RESPONSIVE MEDIA QUERIES */
+@media screen and (max-width: 908px) {
+    html, body {
+        min-height: 100dvh;
+        overflow-x: auto;
+    }
+    body {
+        padding: 0;
+        display: block;
+    }
+    .form-page {
+        min-height: 100dvh;
+    }
+    .form-container {
+        display: block;
+        width: 95%;
+    }
+    .form-page .back-button a {
+        margin-right: 1rem;
+    }
+    .form-container .input-group input,
+    .form-container .input-group select,
+    .form-container .input-group textarea {
+        height: 35px;
+        font-size: 14px;
+    }
+    .form-container .input-group textarea {
+        height: 100px;
+    }
+    .form-container .header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .form-container .id-container {
+        align-self: center;
+    }
+    #workers-table {
+        width: 100% !important;
+    }
+    .form-container button[type="submit"] {
+        width: 100%;
+        background-color: var(--clr-primary);
+        color: var(--clr-secondary);
+    }
+    .form-container > * {
+        grid-column: 1 / -1 !important;
+    }
+    .form-container .input-group:nth-child(n+2) {
+        margin-top: 1rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    html {
+        font-size: 14px;
+    }
+    .form-container {
+        min-height: 100dvh;
+        grid-row-gap: 8px;
+    }
+    .form-container {
+        grid-template-columns: 1fr !important;
+        grid-row-gap: 10px;
+    }
+    .form-page .back-button a {
+        margin-right: 0rem;
+    }
+    .form-page .back-button a svg {
+        max-height: 35px;
+    }
+    .form-title {
+        font-size: 1.5rem !important;
+    }
+    .form-container .input-group .complex-label {
+        flex-direction: column;
+        gap: 5px;
+        margin-bottom: 0;
+    }
+    .form-container .input-group .action-button {
+        max-width: 100%;
+        height: 45px;
+    }
+    #workers-table {
+        font-size: 12px;
+    }
+    #workers-table th {
+        padding: 2px 5px;
+        background-color: var(--clr-primary);
+        color: var(--clr-secondary);
+    }
+    .form-container .input-file .icon-container svg {
+        height: 25px;
+    }
+    .form-container button[type="submit"] {
+        font-size: 14px;
+        padding: 0.5rem;
+        background-color: var(--clr-primary);
+        color: var(--clr-secondary);
+    }
+    .id-number {
+        font-size: 14px;
+    }
+    .info-button {
+        font-size: 14px;
+        text-align: center;
+    }
+}
