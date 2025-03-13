@@ -27,7 +27,6 @@ app.config["MONGO_TLS"] = True
 app.config["MONGO_TLS_CA_FILE"] = ssl_cert_path
 app.logger.info(f"Conectando a MongoDB con certificado en: {ssl_cert_path}")
 
-# Inicializa PyMongo
 try:
     mongo = PyMongo(app)
     app.logger.info("Conexión a MongoDB establecida correctamente")
@@ -44,11 +43,6 @@ counters_col = mongo.db.counters  # Para llevar el contador de folios
 CURRENT_FOLIO = None
 
 def get_next_folio():
-    """
-    Incrementa de forma atómica el contador de folios en la colección 'counters'
-    y devuelve un folio con el formato "NOV2406-XXXX" (donde XXXX es un número secuencial con ceros a la izquierda).
-    Se utiliza $setOnInsert para inicializar el contador en 0 si no existe.
-    """
     try:
         counter = counters_col.find_one_and_update(
             {"_id": "folio"},
@@ -70,7 +64,6 @@ def get_next_folio():
 def index():
     global CURRENT_FOLIO
     try:
-        # Si CURRENT_FOLIO es None, se intenta leer el contador actual sin modificarlo.
         if CURRENT_FOLIO is None:
             counter = counters_col.find_one({"_id": "folio"})
             if counter and "seq" in counter:
@@ -94,12 +87,10 @@ def add_worker():
             app.logger.error("No se recibieron datos en /add_worker")
             return jsonify({"error": "No data received"}), 400
 
-        # Si aún no hay un folio activo, se genera uno nuevo (esto incrementa el contador)
         if CURRENT_FOLIO is None:
             CURRENT_FOLIO = get_next_folio()
             app.logger.info(f"Nuevo folio asignado: {CURRENT_FOLIO}")
 
-        # Se almacenan en la colección workers tanto los datos generales de la solicitud como los específicos del trabajador.
         worker = {
             "request_date": data.get("requestDate", ""),
             "start_date": data.get("startDate", ""),
@@ -142,12 +133,10 @@ def get_workers():
 def send_request():
     global CURRENT_FOLIO
     try:
-        # Campos de la solicitud (recibidos desde el formulario)
         work_description = request.form.get("workDescription")
         supplier = request.form.get("supplier")
         rfc = request.form.get("rfc")
         
-        # Se obtiene la lista de _id de los trabajadores asociados al folio activo
         workers_list = list(workers_col.find({"folio": CURRENT_FOLIO}))
         worker_ids = [str(w["_id"]) for w in workers_list]
 
@@ -160,7 +149,6 @@ def send_request():
         }
         requests_col.insert_one(solicitud)
         app.logger.info(f"Solicitud enviada con folio: {CURRENT_FOLIO}")
-        # Resetea el folio para iniciar un nuevo grupo de trabajadores
         CURRENT_FOLIO = None
         app.logger.info("Folio reseteado para la próxima solicitud")
         return redirect(url_for("index"))
