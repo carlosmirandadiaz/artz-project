@@ -9,23 +9,23 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Configura la conexión a MongoDB usando la variable de entorno.
-# La URI debe incluir el nombre de la base de datos (por ejemplo, "Artz")
+# Obtén las variables de entorno
 mongo_uri = os.getenv("MONGO_URI")
-ssl_cert_file = os.getenv("SSL_CERT_FILE")  # Ruta al archivo PEM
+ssl_cert_file = os.getenv("SSL_CERT_FILE")  # Ejemplo: "./certs/cacert.pem"
 
 if not mongo_uri:
     app.logger.error("MONGO_URI no está definida en las variables de entorno")
     raise Exception("La variable MONGO_URI es requerida")
-
 if not ssl_cert_file:
     app.logger.error("SSL_CERT_FILE no está definida en las variables de entorno")
     raise Exception("La variable SSL_CERT_FILE es requerida")
 
-# Configuración de Flask-PyMongo con SSL
+# Usa la ruta absoluta del certificado
+ssl_cert_path = os.path.join(os.getcwd(), ssl_cert_file)
 app.config["MONGO_URI"] = mongo_uri
 app.config["MONGO_TLS"] = True
-app.config["MONGO_TLS_CA_FILE"] = ssl_cert_file  # Usar el archivo PEM
+app.config["MONGO_TLS_CA_FILE"] = ssl_cert_path
+app.logger.info(f"Conectando a MongoDB con certificado en: {ssl_cert_path}")
 
 # Inicializa PyMongo
 try:
@@ -47,12 +47,12 @@ def get_next_folio():
     """
     Incrementa de forma atómica el contador de folios en la colección 'counters'
     y devuelve un folio con el formato "NOV2406-XXXX" (donde XXXX es un número secuencial con ceros a la izquierda).
-    Se utiliza solo $inc para evitar conflictos.
+    Se utiliza $setOnInsert para inicializar el contador en 0 si no existe.
     """
     try:
         counter = counters_col.find_one_and_update(
             {"_id": "folio"},
-            {"$inc": {"seq": 1}},
+            {"$setOnInsert": {"seq": 0}, "$inc": {"seq": 1}},
             upsert=True,
             return_document=ReturnDocument.AFTER
         )
@@ -74,7 +74,6 @@ def index():
         if CURRENT_FOLIO is None:
             counter = counters_col.find_one({"_id": "folio"})
             if counter and "seq" in counter:
-                # Si el contador existe, se muestra su valor actual (por ejemplo, si seq=1, muestra NOV2406-0001)
                 folio = f"NOV2406-{str(counter['seq']).zfill(4)}"
             else:
                 folio = "NOV2406-0001"
@@ -161,11 +160,9 @@ def send_request():
         }
         requests_col.insert_one(solicitud)
         app.logger.info(f"Solicitud enviada con folio: {CURRENT_FOLIO}")
-
-        # Se resetea CURRENT_FOLIO para iniciar un nuevo grupo en la siguiente solicitud.
+        # Resetea el folio para iniciar un nuevo grupo de trabajadores
         CURRENT_FOLIO = None
         app.logger.info("Folio reseteado para la próxima solicitud")
-
         return redirect(url_for("index"))
     except Exception as e:
         app.logger.error(f"Error en /send_request: {e}")
