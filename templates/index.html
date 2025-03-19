@@ -9,7 +9,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Artz</title>
 
-    <!-- Vinculamos la hoja de estilo externa (en /static/styles.css) -->
+    <!-- Vinculamos la hoja de estilo externa (ej. /static/styles.css) -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='styles.css') }}"
@@ -55,6 +55,7 @@
           id="main-form"
           method="POST"
           action="/send_request"
+          enctype="multipart/form-data"
         >
           <!-- Encabezado -->
           <div class="header">
@@ -78,23 +79,23 @@
           <!-- Campos de formulario -->
           <div class="input-group">
             <label for="requestDate">Fecha de solicitud</label>
-            <input type="date" name="requestDate" />
+            <input type="date" name="requestDate" required />
           </div>
           <div class="input-group">
             <label for="startDate">Fecha de entrada</label>
-            <input type="date" name="startDate" />
+            <input type="date" name="startDate" required />
           </div>
           <div class="input-group">
             <label for="startTime">Horario de entrada</label>
-            <input type="time" name="startTime" />
+            <input type="time" name="startTime" required />
           </div>
           <div class="input-group">
             <label for="endDate">Fecha de salida</label>
-            <input type="date" name="endDate" />
+            <input type="date" name="endDate" required />
           </div>
           <div class="input-group">
             <label for="endTime">Horario de salida</label>
-            <input type="time" name="endTime" />
+            <input type="time" name="endTime" required />
           </div>
           <div class="input-group">
             <div class="complex-label">
@@ -104,19 +105,19 @@
               <p class="sublabel" id="label-sublabel">Torre</p>
               <p class="sublabel" id="label-others">Otros</p>
             </div>
-            <select name="brand" id="brand-select">
-              <!-- Se llenará vía script -->
+            <select name="brand" id="brand-select" required>
+              <!-- Se llenará vía script.js -->
             </select>
           </div>
           <div class="input-group">
             <label for="workPeriod"
               >Periodo de trabajos a realizar</label
             >
-            <input type="date" name="workPeriod" />
+            <input type="date" name="workPeriod" required />
           </div>
           <div class="input-group">
             <label for="workCategory">Categoría de trabajo</label>
-            <select name="workCategory">
+            <select name="workCategory" required>
               <option value="" disabled selected>
                 Selecciona una opción
               </option>
@@ -151,6 +152,7 @@
               type="text"
               name="workerFullName"
               id="workerFullName"
+              required
             />
           </div>
           <div class="input-group">
@@ -173,7 +175,7 @@
                 >(*Obligatorio para el responsable)</span
               ></label
             >
-            <input type="text" name="workerMail" id="workerMail" />
+            <input type="email" name="workerMail" id="workerMail" />
           </div>
           <div class="input-group">
             <label for="workerPhone"
@@ -193,7 +195,7 @@
 
           <!-- Listado de trabajadores -->
           <div class="input-group mt-1">
-            <label for="workerList">
+            <label>
               <b>Listado de trabajadores</b>
             </label>
             <table id="workers-table">
@@ -214,7 +216,7 @@
             <textarea name="workDescription"></textarea>
           </div>
           <div class="input-group input-file">
-            <label for="images">
+            <label for="file">
               <span>Subir imágenes</span>
               <div class="icon-container">
                 <svg
@@ -278,8 +280,8 @@
             </label>
             <input
               type="file"
-              name="images"
-              id="images"
+              name="file"
+              id="file"
               style="display: none;"
             />
           </div>
