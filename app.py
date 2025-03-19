@@ -47,10 +47,14 @@ def get_next_folio():
     try:
         counter = counters_col.find_one_and_update(
             {"_id": "folio"},
-            {"$setOnInsert": {"seq": 0}, "$inc": {"seq": 1}},
+            {"$inc": {"seq": 1}},
             upsert=True,
             return_document=ReturnDocument.AFTER
         )
+        if not counter:
+            counters_col.insert_one({"_id": "folio", "seq": 1})
+            counter = counters_col.find_one({"_id": "folio"})
+
         folio_number = counter["seq"]
         folio_suffix = str(folio_number).zfill(4)
         prefix = "NOV2406"
@@ -59,20 +63,13 @@ def get_next_folio():
         return folio
     except Exception as e:
         app.logger.error(f"❌ Error al generar el folio: {e}")
-        raise e
+        return "NOV2406-0001"
 
 @app.route("/")
 def index():
-    global CURRENT_FOLIO
     try:
-        if CURRENT_FOLIO is None:
-            counter = counters_col.find_one({"_id": "folio"})
-            if counter and "seq" in counter:
-                folio = f"NOV2406-{str(counter['seq']).zfill(4)}"
-            else:
-                folio = "NOV2406-0001"
-        else:
-            folio = CURRENT_FOLIO
+        last_folio_doc = counters_col.find_one({"_id": "folio"})
+        folio = f"NOV2406-{str(last_folio_doc['seq']).zfill(4)}" if last_folio_doc else "NOV2406-0001"
         app.logger.info(f"🏠 Página de inicio cargada con folio: {folio}")
         return render_template("index.html", folio=folio)
     except Exception as e:
@@ -85,49 +82,32 @@ def add_worker():
     try:
         data = request.get_json()
         if not data:
-            app.logger.error("❌ No se recibieron datos en /add_worker")
             return jsonify({"error": "No data received"}), 400
 
         if CURRENT_FOLIO is None:
             CURRENT_FOLIO = get_next_folio()
-            app.logger.info(f"📄 Nuevo folio asignado: {CURRENT_FOLIO}")
+            counters_col.update_one({"_id": "last_folio"}, {"$set": {"folio": CURRENT_FOLIO}}, upsert=True)
 
-        worker = {
-            "request_date": data.get("requestDate", ""),
-            "start_date": data.get("startDate", ""),
-            "start_time": data.get("startTime", ""),
-            "end_date": data.get("endDate", ""),
-            "end_time": data.get("endTime", ""),
-            "brand": data.get("brand", ""),
-            "work_period": data.get("workPeriod", ""),
-            "work_category": data.get("workCategory", ""),
-            "folio": CURRENT_FOLIO,
-            "fullName": data.get("fullName", ""),
-            "managerName": data.get("managerName", ""),
-            "workerId": data.get("workerId", ""),
-            "workerMail": data.get("workerMail", ""),
-            "workerPhone": data.get("workerPhone", "")
-        }
+        worker = {"folio": CURRENT_FOLIO, **data}
         workers_col.insert_one(worker)
-        app.logger.info(f"👷‍♂️ Worker agregado con folio: {CURRENT_FOLIO}")
-        return jsonify({"status": "ok", "msg": "Worker added", "folio": CURRENT_FOLIO}), 200
+        return jsonify({"status": "ok", "folio": CURRENT_FOLIO}), 200
     except Exception as e:
-        app.logger.error(f"❌ Error en /add_worker: {e}")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/get_workers", methods=["GET"])
 def get_workers():
     try:
-        if CURRENT_FOLIO is None:
-            app.logger.info("🔍 No hay folio activo, devolviendo lista vacía")
+        last_folio_doc = counters_col.find_one({"_id": "last_folio"})
+        last_folio = last_folio_doc["folio"] if last_folio_doc else None
+
+        if not last_folio:
             return jsonify([]), 200
-        all_workers = list(workers_col.find({"folio": CURRENT_FOLIO}))
-        for w in all_workers:
+
+        workers = list(workers_col.find({"folio": last_folio}))
+        for w in workers:
             w["_id"] = str(w["_id"])
-        app.logger.info(f"👷‍♂️ Workers obtenidos para el folio: {CURRENT_FOLIO}")
-        return jsonify(all_workers), 200
+        return jsonify(workers), 200
     except Exception as e:
-        app.logger.error(f"❌ Error en /get_workers: {e}")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/send_request", methods=["POST"])
@@ -137,24 +117,22 @@ def send_request():
         work_description = request.form.get("workDescription")
         supplier = request.form.get("supplier")
         rfc = request.form.get("rfc")
-        
+
         workers_list = list(workers_col.find({"folio": CURRENT_FOLIO}))
         worker_ids = [str(w["_id"]) for w in workers_list]
 
-        solicitud = {
+        requests_col.insert_one({
             "work_description": work_description,
             "supplier": supplier,
             "rfc": rfc,
             "workers": worker_ids,
             "folio": CURRENT_FOLIO
-        }
-        requests_col.insert_one(solicitud)
-        app.logger.info(f"📩 Solicitud enviada con folio: {CURRENT_FOLIO}")
+        })
+
+        counters_col.update_one({"_id": "last_folio"}, {"$set": {"folio": CURRENT_FOLIO}}, upsert=True)
         CURRENT_FOLIO = None
-        app.logger.info("♻️ Folio reseteado para la próxima solicitud")
         return redirect(url_for("index"))
     except Exception as e:
-        app.logger.error(f"❌ Error en /send_request: {e}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":

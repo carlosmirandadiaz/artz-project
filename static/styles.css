@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Neue Haas Unica W1G';
-    src: url('../css/Neue Haas Unica W1G.ttf') format('truetype');
+    src: url('css/nhu.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
