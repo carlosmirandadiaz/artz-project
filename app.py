@@ -1,8 +1,9 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, request, render_template, jsonify, redirect, url_for
+from flask import Flask, request, render_template, jsonify, redirect, url_for, send_from_directory
 from flask_pymongo import PyMongo
 from pymongo import ReturnDocument
+from werkzeug.utils import secure_filename
 
 # Carga las variables de entorno desde .env
 load_dotenv()
@@ -11,7 +12,6 @@ app = Flask(__name__)
 
 # Obtiene la URI de MongoDB desde Railway
 mongo_uri = os.getenv("MONGO_URI")
-
 if not mongo_uri:
     app.logger.error("❌ MONGO_URI no está definida en las variables de entorno")
     raise Exception("La variable MONGO_URI es requerida")
@@ -22,19 +22,22 @@ app.logger.info(f"🔗 Conectando a MongoDB en: {mongo_uri}")
 
 try:
     mongo = PyMongo(app)
-    db = mongo.db  # Obtiene la base de datos principal
-    if db is None:
-        raise Exception("❌ No se pudo conectar a la base de datos en Railway")
-    
-    # Definir colecciones
+    db = mongo.db
     workers_col = db.workers
     requests_col = db.requests
-    counters_col = db.counters  # Para el contador de folios
-
+    counters_col = db.counters
+    images_col = db.images  # Nueva colección para imágenes
     app.logger.info("✅ Conexión a MongoDB establecida correctamente")
 except Exception as e:
     app.logger.error(f"❌ Error al conectar a MongoDB: {e}")
     raise e
+
+# Configuración de almacenamiento de imágenes
+UPLOAD_FOLDER = "uploads"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 # Variable global para el folio activo
 CURRENT_FOLIO = None
@@ -121,20 +124,58 @@ def send_request():
         workers_list = list(workers_col.find({"folio": CURRENT_FOLIO}))
         worker_ids = [str(w["_id"]) for w in workers_list]
 
-        requests_col.insert_one({
+        # Manejo de imagen subida
+        image_id = None
+        if "file" in request.files:
+            file = request.files["file"]
+            if file.filename != "" and file.filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                file.save(file_path)
+                image_data = {"filename": filename, "path": file_path}
+                image_id = images_col.insert_one(image_data).inserted_id
+
+        request_data = {
             "work_description": work_description,
             "supplier": supplier,
             "rfc": rfc,
             "workers": worker_ids,
-            "folio": CURRENT_FOLIO
-        })
+            "folio": CURRENT_FOLIO,
+            "image_id": str(image_id) if image_id else None
+        }
 
+        requests_col.insert_one(request_data)
         workers_col.delete_many({"folio": CURRENT_FOLIO})
         counters_col.update_one({"_id": "last_folio"}, {"$set": {"folio": CURRENT_FOLIO}}, upsert=True)
         CURRENT_FOLIO = None
         return redirect(url_for("index"))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/upload_image", methods=["POST"])
+def upload_image():
+    if "file" not in request.files:
+        return jsonify({"error": "No se ha enviado ningún archivo"}), 400
+    
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "Nombre de archivo vacío"}), 400
+    
+    if file and file.filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(file_path)
+        
+        image_data = {"filename": filename, "path": file_path}
+        image_id = images_col.insert_one(image_data).inserted_id
+        
+        return jsonify({"message": "Imagen subida exitosamente", "image_id": str(image_id)}), 201
+    else:
+        return jsonify({"error": "Formato de archivo no permitido"}), 400
+
+@app.route("/uploads/<filename>", methods=["GET"])
+def get_image(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
