@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel de Administración</title>
+  <!-- Carga tu CSS específico para admin -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+  <header>
+    <h1>Panel de Administración</h1>
+  </header>
+
+  <!-- Barra de navegación con botones para cambiar de pestaña -->
+  <nav>
+    <button class="tablink active" onclick="openTab(event, 'Workers')">Trabajadores</button>
+    <button class="tablink" onclick="openTab(event, 'Requests')">Solicitudes</button>
+    <button class="tablink" onclick="openTab(event, 'Images')">Imágenes</button>
+  </nav>
+
+  <main>
+    <!-- Sección de Trabajadores -->
+    <section id="Workers" class="tabcontent" style="display: block;">
+      <h2>Trabajadores</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Folio</th>
+            <th>Datos</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for worker in workers %}
+          <tr>
+            <td>{{ worker._id }}</td>
+            <td>{{ worker.folio }}</td>
+            <td>
+              {% for key, value in worker.items() if key not in ['_id', 'folio'] %}
+                <strong>{{ key }}:</strong> {{ value }}<br>
+              {% endfor %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Sección de Solicitudes -->
+    <section id="Requests" class="tabcontent">
+      <h2>Solicitudes</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Folio</th>
+            <th>Descripción</th>
+            <th>Proveedor</th>
+            <th>RFC</th>
+            <th>Trabajadores</th>
+            <th>ID Imagen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in requests %}
+          <tr>
+            <td>{{ req._id }}</td>
+            <td>{{ req.folio }}</td>
+            <td>{{ req.work_description }}</td>
+            <td>{{ req.supplier }}</td>
+            <td>{{ req.rfc }}</td>
+            <td>{{ req.workers }}</td>
+            <td>{{ req.image_id }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Sección de Imágenes -->
+    <section id="Images" class="tabcontent">
+      <h2>Imágenes</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Filename</th>
+            <th>Path</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for image in images %}
+          <tr>
+            <td>{{ image._id }}</td>
+            <td>{{ image.filename }}</td>
+            <td>{{ image.path }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- Carga tu JS específico para admin -->
+  <script src="{{ url_for('static', filename='admin.js') }}"></script>
+</body>
+</html>

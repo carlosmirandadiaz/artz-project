@@ -68,6 +68,46 @@ def get_next_folio():
         app.logger.error(f"❌ Error al generar el folio: {e}")
         return "NOV2406-0001"
 
+from flask import Flask, request, jsonify, render_template, redirect, url_for, send_from_directory, Response
+from werkzeug.utils import secure_filename
+from functools import wraps
+import os
+
+app = Flask(__name__)
+
+# Configuraciones y definiciones previas (por ejemplo, conexión a la BD, colecciones, ALLOWED_EXTENSIONS, etc.)
+
+# Ejemplo: variables globales y configuraciones
+CURRENT_FOLIO = None
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config["UPLOAD_FOLDER"] = "uploads"
+
+# ---------------------------------------------
+# Decorador de autenticación básica para /admin
+def check_auth(username, password):
+    # Para pruebas: usuario "admin" y contraseña "password"
+    return username == "admin" and password == "password"
+
+def authenticate():
+    # Respuesta 401 para solicitar credenciales
+    return Response(
+        'No se pudo verificar el acceso.\nIntroduce credenciales válidas.',
+        401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'}
+    )
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
+# ---------------------------------------------
+# Rutas existentes
+
 @app.route("/")
 def index():
     try:
@@ -177,6 +217,29 @@ def upload_image():
 def get_image(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
+# ---------------------------------------------
+# Nueva ruta /admin protegida con autenticación
+
+@app.route("/admin")
+@requires_auth
+def admin():
+    # Obtener todos los trabajadores, solicitudes e imágenes
+    workers = list(workers_col.find())
+    requests_list = list(requests_col.find())
+    images = list(images_col.find())
+
+    # Convertir ObjectId a string para cada documento
+    for doc in workers:
+        doc["_id"] = str(doc["_id"])
+    for doc in requests_list:
+        doc["_id"] = str(doc["_id"])
+    for doc in images:
+        doc["_id"] = str(doc["_id"])
+
+    return render_template("admin.html", workers=workers, requests=requests_list, images=images)
+
+# ---------------------------------------------
+# Inicio de la aplicación
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
