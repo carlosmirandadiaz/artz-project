@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'Neue Haas Unica W1G';
+    src: url('../css/Neue Haas Unica W1G.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 :root {
     --clr-primary: #000000;
     --clr-secondary: #ffffff;
@@ -19,6 +26,7 @@ body {
     padding: 0;
     overflow-x: hidden;
     box-sizing: border-box;
+    font-family: 'Neue Haas Unica W1G', sans-serif;
 }
 
 body {
