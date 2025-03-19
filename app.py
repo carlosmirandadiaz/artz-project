@@ -129,6 +129,7 @@ def send_request():
             "folio": CURRENT_FOLIO
         })
 
+        workers_col.delete_many({"folio": CURRENT_FOLIO})
         counters_col.update_one({"_id": "last_folio"}, {"$set": {"folio": CURRENT_FOLIO}}, upsert=True)
         CURRENT_FOLIO = None
         return redirect(url_for("index"))
